@@ -25,12 +25,16 @@ class GameMechs
         int boardSizeX;
         int boardSizeY;
 
+        int score = 0;
+        bool loseFlag;
+
     public:
         GameMechs();
         GameMechs(int boardX, int boardY);
         
         bool getExitFlagStatus();
         void setExitTrue();
+        void setExitFalse();
 
         char getInput();
         void setInput(char this_input);
@@ -39,7 +43,10 @@ class GameMechs
         int getBoardSizeX();
         int getBoardSizeY();
       
-
+        bool getLoseFlag() const;
+        int getScore();
+        void toggleLoseFlag();
+        void incrementScore(int increment);
 };
 
 #endif

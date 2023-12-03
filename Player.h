@@ -26,9 +26,11 @@ class Player
     private:
         objPos playerPos;   // Upgrade this in iteration 3.       
         enum Dir myDir;
+        char symbol;
 
         // Need a reference to the Main Game Mechanisms
         GameMechs* mainGameMechsRef;
+        void wrapPosition();
 };
 
 #endif
