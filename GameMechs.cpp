@@ -1,4 +1,5 @@
 #include "GameMechs.h"
+#include "MacUILib.h"
 
 GameMechs::GameMechs()
 {
@@ -29,7 +30,17 @@ bool GameMechs::getExitFlagStatus()
 
 char GameMechs::getInput()
 {
-    return input;
+    if (MacUILib_hasChar()) 
+    {  // Check if there is input
+        char newinput = MacUILib_getChar(); // Get the input from the UI library
+        setInput(newinput);  // Set the input in the GameMechs object
+
+        // Check for the 'Q' or 'q' key to exit the game
+        if (input == 'Q' || input == 'q') 
+        {
+            exitFlag = true; // Set the exit flag to true
+        }
+    }
 }
 
 int GameMechs::getBoardSizeX()

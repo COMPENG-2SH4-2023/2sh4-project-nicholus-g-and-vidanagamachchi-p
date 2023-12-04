@@ -10,8 +10,8 @@ using namespace std;
 #define DELAY_CONST 100000
 
 // Declare a pointer to a GameMechs object globally
-GameMechs* gameMechanics = nullptr;
-Player* player = nullptr;
+GameMechs* myGM = nullptr;
+Player* myPlayer = nullptr;
 
 void Initialize(void);
 void GetInput(void);
@@ -26,7 +26,7 @@ int main(void)
 {
 
     Initialize();
-    while (!gameMechanics->getExitFlagStatus())  
+    while (!myGM->getExitFlagStatus())  
     {
         GetInput();
         RunLogic();
@@ -43,60 +43,80 @@ void Initialize(void)
 {
     MacUILib_init();
     MacUILib_clearScreen();
-    gameMechanics = new GameMechs(); // Initialize the GameMechs object
-    player = new Player(gameMechanics);
-    gameMechanics->setExitFalse();   // Ensure the exit flag is initially false
-}
+    myGM = new GameMechs(); // Initialize the GameMechs object
+    myPlayer = new Player(myGM);
+    myGM->setExitFalse();   // Ensure the exit flag is initially false
+    objPos tempPos{-1,-1,'o'}; //make shift setup to not touch generateItem yet, do this soon
+    //myPlayer->getPlayerPos(tempPos);
+    //myGM->generateFood(tempPos);//how to turn into arraylist operation
+
+    }
 
 void GetInput(void)
 {
-   if (MacUILib_hasChar()) {  // Check if there is input
-        char input = MacUILib_getChar(); // Get the input from the UI library
-        gameMechanics->setInput(input);  // Set the input in the GameMechs object
-
-        // Check for the 'Q' or 'q' key to exit the game
-        if (input == 'Q' || input == 'q') 
-        {
-            gameMechanics->setExitTrue(); // Set the exit flag to true
-        }
-    }
+   myGM->getInput();
 }
 
 void RunLogic(void)
 {
-    
+    myPlayer->updatePlayerDir();
+    myPlayer->movePlayer();
+
+    myGM->clearInput();
+
 }
 
 void DrawScreen(void)
 {
-    MacUILib_clearScreen();    
+   MacUILib_clearScreen();
 
-    if (gameMechanics->getLoseFlag()) 
-    {
-        cout << "Game Over! You have lost." << endl;
-    }
-   
+    bool drawn;
     objPos playerPosition;
-    player->getPlayerPos(playerPosition); 
 
-    // Draw the game border and objects
-    for (int i = 0; i < gameMechanics->getBoardSizeY(); ++i) {
-        for (int j = 0; j < gameMechanics->getBoardSizeX(); ++j) {
-            if (i == 0 || i == gameMechanics->getBoardSizeY() - 1 || j == 0 || j == gameMechanics->getBoardSizeX() - 1) 
+    objPosArrayList* playerBody = myPlayer->getPlayerPos();
+    objPos tempBody;
+
+    objPos tempFoodPos;
+    //myGM -> getFoodPos(tempFoodPos);
+
+    for(int i = 0; i < myGM->getBoardSizeY(); i++){
+        for (int j = 0; j < myGM->getBoardSizeX(); j++){
+
+            drawn = false;
+           
+            for(int k = 0; k < playerBody->getSize(); k++){
+                playerBody->getElement(tempBody, k);
+                if(tempBody.x == j && tempBody.y == i){
+                    MacUILib_printf("%c", tempBody.symbol);
+                    drawn = true;
+                    break;
+                }
+            }
+
+            if(drawn) continue;
+            //drawing border
+            if (i == 0 || i == myGM->getBoardSizeY() - 1 || j==0 || j == myGM->getBoardSizeX() - 1) //might be wrong
             {
-                cout << '#';
-            } else if (i == playerPosition.y && j == playerPosition.x) 
+                MacUILib_printf("%c", '#');
+            }
+           
+            /*else if(j == tempFoodPos.x && i == tempFoodPos.y)
             {
-                cout << playerPosition.getSymbol(); 
-            } 
+                MacUILib_printf("%c", tempFoodPos.symbol);
+            }*/
             else 
             {
-                
-                cout << ' ';
+                MacUILib_printf("%c", ' ');
             }
         }
-        cout << endl;
+
+        MacUILib_printf("\n");
     }
+
+    MacUILib_printf("Score: %d\n", myGM->getScore());//have to update later
+
+    //MacUILib_printf("Food Pos: <%d, %d>\n",tempFoodPos.x, tempFoodPos.y);
+
 }
 
 void LoopDelay(void)
@@ -109,10 +129,10 @@ void CleanUp(void)
 {
     MacUILib_clearScreen();
 
-    delete player; 
-    player = nullptr;
+    delete myPlayer; 
+    myPlayer = nullptr;
 
-    delete gameMechanics;
-    gameMechanics = nullptr;
+    delete myGM;
+    myGM = nullptr;
     MacUILib_uninit();
 }

@@ -1,119 +1,111 @@
 #include "Player.h"
-
+#include <iostream>
 
 Player::Player(GameMechs* thisGMRef)
 {
     mainGameMechsRef = thisGMRef;
     myDir = STOP;
-    symbol = '*';
 
-    // more actions to be included
-    // Set playerPos to the center of the board
-    playerPos.x = mainGameMechsRef->getBoardSizeX() / 2;
-    playerPos.y = mainGameMechsRef->getBoardSizeY() / 2;
+    objPos tempPos;
+    tempPos.setObjPos(mainGameMechsRef->getBoardSizeX() / 2,
+                      mainGameMechsRef->getBoardSizeY() / 2,
+                        '*');
+
+    // more actions to be included ----> can write in simpler way
+    playerPosList = new objPosArrayList();
+    playerPosList->insertHead(tempPos);
 }
-
 
 Player::~Player()
 {
     // delete any heap members here
+    delete playerPosList;
 }
 
-void Player::getPlayerPos(objPos &returnPos)
+objPosArrayList* Player::getPlayerPos()
 {
-    // return the reference to the playerPos array list
-    returnPos = playerPos;
+    // return the reference to the playerPos arrray list
+    return playerPosList;
 }
 
 void Player::updatePlayerDir()
 {
-    // PPA3 input processing logic   
-    char input = mainGameMechsRef->getInput();  
-    if (input != 0) 
-    {  // if not null character
-        switch (input) 
-        {
-            case ' ':  // exit
-                mainGameMechsRef->setExitTrue();  
-                break;
-            case 'w':
-            case 'W':
-                if (myDir == LEFT || myDir == RIGHT || myDir == STOP) 
-                {
-                    myDir = UP;
-                }
-                break;
-            case 'a':
-            case 'A':
-                if (myDir == UP || myDir == DOWN || myDir == STOP) 
-                {
-                    myDir = LEFT;
-                }
-                break;
-            case 's':
-            case 'S':
-                if (myDir == LEFT || myDir == RIGHT || myDir == STOP) 
-                {
-                    myDir = DOWN;
-                }
-                break;
-            case 'd':
-            case 'D':
-                if (myDir == UP || myDir == DOWN || myDir == STOP) 
-                {
-                    myDir = RIGHT;
-                }
-                break;
-        }
-        mainGameMechsRef->clearInput();  
-    }     
+    // PPA3 input processing logic    
+    char control = mainGameMechsRef->getInput();
+    std::cout << "Input received: " << control << std::endl; // Debug statement
+
+if(control != 0)
+{
+    switch(control)
+    {
+        case 'W':
+        case 'w':
+            if(myDir != UP && myDir != DOWN)
+                myDir = UP;
+            break;
+        case 'A': 
+        case 'a':
+            if(myDir != LEFT && myDir != RIGHT)
+                myDir = LEFT;
+            break;
+        case 'S':
+        case 's':
+            if(myDir != UP && myDir != DOWN)
+                myDir = DOWN;
+            break;
+        case 'D':
+        case 'd':
+            if(myDir != LEFT && myDir != RIGHT)
+                myDir = RIGHT;
+            break;
+        default:
+            break;
+    }    
+     std::cout << "Direction after input: " << myDir << std::endl; // Debug statement
+
+}
 }
 
 void Player::movePlayer()
 {
     // PPA3 Finite State Machine logic
-    switch (myDir) 
+   
+    objPos currentHead; //holds pos information of current head
+    playerPosList->getHeadElement(currentHead);
+    std::cout << "Current head before move: " << currentHead.x << ", " << currentHead.y << std::endl; // Debug statement
+
+
+    switch(myDir)
     {
         case UP:
-            playerPos.y -= 1;
+            currentHead.y--;
+            if(currentHead.y <= 0) //wraparound logic
+                currentHead.y = mainGameMechsRef -> getBoardSizeY() - 2;
             break;
         case DOWN:
-            playerPos.y += 1;
+            currentHead.y++;
+            if(currentHead.y >= mainGameMechsRef->getBoardSizeY()) //wraparound logic
+                currentHead.y = 1;
             break;
         case LEFT:
-            playerPos.x -= 1;
+            currentHead.x--;
+            if(currentHead.x <= 0)
+                currentHead.x = mainGameMechsRef->getBoardSizeX() - 2;
             break;
         case RIGHT:
-            playerPos.x += 1;
+            currentHead.x++;
+            if(currentHead.x >= mainGameMechsRef->getBoardSizeX())
+                currentHead.x = 1;
             break;
         case STOP:
-            // No movement for STOP
+        default:
             break;
+       
+
     }
-    wrapPosition();
+    std::cout << "New head after move: " << currentHead.x << ", " << currentHead.y << std::endl; // Debug statement
+    playerPosList->insertHead(currentHead);
+    playerPosList->removeTail();
 }
 
-void Player::wrapPosition() 
-{
-    int boardSizeX = mainGameMechsRef->getBoardSizeX();  
-    int boardSizeY = mainGameMechsRef->getBoardSizeY();  
-
-    // Implement wrap-around logic as shown in PPA3
-    if (playerPos.x < 1) 
-    {
-        playerPos.x = boardSizeX - 2;
-    } 
-    else if (playerPos.x >= boardSizeX - 1) 
-    {
-        playerPos.x = 1;
-    }
-    if (playerPos.y < 1) 
-    {
-        playerPos.y = boardSizeY - 2;
-    } 
-    else if (playerPos.y >= boardSizeY - 1) 
-    {
-        playerPos.y = 1;
-    }
-}
 

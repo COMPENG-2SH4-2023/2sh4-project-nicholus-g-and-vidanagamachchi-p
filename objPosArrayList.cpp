@@ -16,7 +16,7 @@ objPosArrayList::~objPosArrayList()
     delete[] aList;
 }
 
-int objPosArrayList::getSize()
+int objPosArrayList::getSize() const
 {
     return sizeList;
 }
@@ -75,7 +75,7 @@ void objPosArrayList::getTailElement(objPos &returnPos)
     }
 }
 
-void objPosArrayList::getElement(objPos &returnPos, int index)
+void objPosArrayList::getElement(objPos &returnPos, int index) const
 {
     if (index >= 0 && index < sizeList) 
     {
